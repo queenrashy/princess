@@ -65,6 +65,7 @@ form{
     border-radius: 10px;
     margin: 10px;
     height: 320px;
+    position: relative;
 }
 form input{
     /* width: 100%; */
@@ -87,6 +88,14 @@ form a{
     color: #fff;
     font-size: 20px;
     margin-bottom: 10px;
+}
+form #togglePassword{
+    position: absolute;
+    right: 30px;
+    top: 45%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    /* padding: 5px; */
 }
 
 /* Form media */
