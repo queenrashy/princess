@@ -119,8 +119,9 @@ nav button a{
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  background-color:  #df80ff;
+  background-color:  #f2f2f2;
   border-radius: 10px;
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
 }
 .card .image_card img {
   width: 80%;
@@ -133,7 +134,7 @@ nav button a{
 }
 .card .image_card p{
     align-self: center;
-    color: #fff;
+    color: #fc03a1;
     margin-top: 0;
     font-size: 18px;
 }
