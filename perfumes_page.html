@@ -4,8 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="perfume_page.css">
 </head>
 <body>
-    <h1>Welcome start buying</h1>
+    <h1>Products</h1>
+    <div id="product-list"></div>
+   <script>
+const baseUrl = "http://127.0.0.1:5000";
+async function loadProducts() {
+  try {
+    const response = await fetch(`${baseUrl}/view/product`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+
+    const container = document.getElementById('product-list');
+    container.innerHTML = '';
+
+    if (!data.products || data.products.length === 0) {
+      container.innerHTML = '<p>No product available</p>';
+      return;
+    }
+
+    data.products.forEach(p => {
+      container.innerHTML += `
+        <div class="product-card">
+          <img src="${baseUrl}/static/uploads/${p.filename}" style="width:150px;" />
+          <h3>${p.title}</h3>
+          <p>${p.description}</p>
+          <p>Price: ${p.price}</p>
+        </div>
+      `;
+    });
+  } catch (err) {
+    document.getElementById("product-list").innerHTML = "<p>Error loading products</p>";
+    console.error("Fetch error:", err);
+  }
+}
+
+
+  loadProducts();
+   </script>
 </body>
+
 </html>

@@ -1,0 +1,129 @@
+body{
+    margin: 0;
+    font-family: sans-serif;
+}
+
+.navbar {
+    background: #df80ff;
+    padding: 10px 20px;
+    color: #e6e2da;
+    position: relative;
+}
+.navbar a{
+    text-decoration: none;
+    color: #fff;
+}
+.hamburger{
+    font-size: 24px;
+    cursor: pointer;
+    display: none;
+    color: #fc03a1;
+}
+.nav-links{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+}
+.nav-links li{
+    position: relative;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+.nav-links li:hover{
+    background: #df80ff;
+}
+.dropdown{
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    padding: 0;
+    margin: 0;
+    width: 150px;
+}
+
+
+.dropdown a{
+    color: #fc03a1;
+    list-style: none;
+    text-decoration: none;
+}
+.has-dropdown.active .dropdown{
+    display: block;
+}
+
+@media (max-width:768px) {
+    .hamburger{
+        display: block;
+    }
+    .nav-links{
+        flex-direction: column;
+        display: none;
+        background:#df80ff;
+        width: 100%;
+    }
+    .nav-links.active{
+        display: flex;
+    }
+    
+    .nav-links li{
+        width: 100%;
+    }
+
+    .dropdown{
+        position: relative;
+        width: 100%;
+    }
+}
+.product-container{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    justify-content: space-between;
+}
+.product-card{
+    flex: 0 1 calc(25% - 20px);
+    box-shadow: 0 2px 6px rgb(0, 0, 0, 0.1);
+    border-radius: 10px;
+    background-color: #fc03a1;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+.product-card:hover{
+    transform: translateY(-4px);
+}
+/* inner card content */
+.product-card-div{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid #df80ff;
+    padding: 10px;
+}
+
+/* product image */
+.product-card-div img{
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+    border-radius: 6px;
+    margin-bottom:10px;
+}
+/* info section */
+.product-info{
+    text-align: center;
+}
+.product-info h3{
+    margin: 0;
+    font-size: 18px;
+    color: #fff;
+}
+.product-info p{
+    margin: 5px 0;
+    color: #fff;
+    font-size: 14px;
+}

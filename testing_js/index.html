@@ -1,15 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shop</title>
+  <link rel="stylesheet" href="perfume_page.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cart {
+      cursor: pointer;
+      position: relative;
+    }
+    .cart-count {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: red;
+      color: white;
+      border-radius: 50%;
+      padding: 2px 6px;
+      font-size: 12px;
+    }
+    .product-card {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin: 10px 0;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    .product-card img {
+      width: 150px;
+      object-fit: cover;
+    }
+    .product-info {
+      flex-grow: 1;
+    }
+    .cart-btn, .buy-btn {
+      margin: 5px;
+      padding: 8px 12px;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .cart-btn {
+      background-color: #007bff;
+      color: white;
+    }
+    .cart-btn:hover {
+      background-color: #0056b3;
+    }
+    .buy-btn {
+      background-color: #25d366;
+      color: white;
+    }
+    .buy-btn:hover {
+      background-color: #128c4a;
+    }
+    .whatsapp-float {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #25d366;
+      border-radius: 50%;
+      padding: 10px;
+      box-shadow: 2px 2px 5px #999;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .whatsapp-float:hover {
+      background-color: #128c4a;
+    }
+  </style>
 </head>
 <body>
-    <form action="">
-        <input type="password" id="password" placeholder="Enter password">
-        <span id="togglePassword" style="position: absolute; right: 10px; top: 10px; cursor: pointer;">👁️</span>
-    </form>
-    <script src="index.js"></script>
+  <header>
+    <h2>Product Store</h2>
+    <div class="cart" onclick="toggleCart()">🛒 <span class="cart-count" id="cart-count">0</span></div>
+  </header>
+
+  <!-- Search Bar -->
+  <input type="text" id="search-input" placeholder="Search products..." />
+  <button onclick="searchProducts()">Search</button>
+
+  <!-- Product List -->
+  <h1>Products</h1>
+  <div id="product"></div>
+
+  <!-- Cart View -->
+  <div id="cart" style="display:none">
+    <h3>Your Cart</h3>
+    <div id="cart-items"></div>
+    <h4>Total: ₦<span id="cart-total">0.00</span></h4>
+    <button onclick="checkout()">Check Out</button>
+  </div>
+
+  <!-- WhatsApp Floating Button -->
+  <a href="https://wa.me/2348139704781" target="_blank" class="whatsapp-float" title="Chat with us on WhatsApp">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" style="width:40px; height:40px;" />
+  </a>
+
+  <script>
+    const baseUrl = "http://127.0.0.1:5000";
+    const userId = 1;
+    let productsGlobal = [];
+
+    function toggleCart() {
+      const cartDiv = document.getElementById("cart");
+      cartDiv.style.display = cartDiv.style.display === "none" ? "block" : "none";
+      loadCart();
+    }
+
+    function renderProducts(products) {
+      const container = document.getElementById("product");
+      container.innerHTML = "";
+
+      if (!products.length) {
+        container.innerHTML = "<p>No Product found</p>";
+        return;
+      }
+
+      products.forEach(p => {
+        container.innerHTML += `
+          <div class='product-card'>
+            <img src="${baseUrl}/static/uploads/${p.filename}" alt="${p.title}" />
+            <div class='product-info'>
+              <h3>${p.title}</h3>
+              <p>${p.description}</p>
+              <p>Price: ₦${p.price}</p>
+              <button class='cart-btn' data-id='${p.id}'>Add to Cart</button>
+              <button class='buy-btn' data-id='${p.id}'>Buy via WhatsApp</button>
+            </div>
+          </div>
+        `;
+      });
+
+      document.querySelectorAll(".cart-btn").forEach(btn => {
+        btn.addEventListener("click", e => {
+          const id = e.target.getAttribute("data-id");
+          addToCart(id);
+        });
+      });
+
+      document.querySelectorAll(".buy-btn").forEach(btn => {
+        btn.addEventListener("click", e => {
+          const id = e.target.getAttribute("data-id");
+          buyButton(id);
+        });
+      });
+    }
+
+    function addToCart(id) {
+      const product = productsGlobal.find(p => p.id == id);
+      if (!product) {
+        alert("Product not found");
+        return;
+      }
+      fetch('/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, product_id: product.id, quantity: 1 })
+      }).then(() => {
+        alert(`${product.title} added to cart!`);
+        updateCartCount();
+      });
+    }
+
+    function buyButton(id) {
+      const product = productsGlobal.find(p => p.id == id);
+      if (!product) {
+        alert("Product not found");
+        return;
+      }
+      const whatsappMessage = encodeURIComponent(`Hi, I want to buy the product: ${product.title} (ID: ${product.id}). Please provide more details.`);
+      window.open(`https://wa.me/2348139704781?text=${whatsappMessage}`, "_blank");
+    }
+
+    function searchProducts() {
+      const query = document.getElementById("search-input").value;
+      fetch(`${baseUrl}/search/product?q=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(products => {
+          productsGlobal = products;
+          renderProducts(productsGlobal);
+        })
+        .catch(err => {
+          console.error("Search error:", err);
+          document.getElementById("product").innerHTML = "<p>Error searching products</p>";
+        });
+    }
+
+    function loadCart() {
+      fetch(`/cart/${userId}`)
+        .then(res => res.json())
+        .then(async items => {
+          const container = document.getElementById("cart-items");
+          container.innerHTML = "";
+          let total = 0;
+
+          for (const item of items) {
+            const res = await fetch(`/search/product?q=&id=${item.product_id}`);
+            const product = (await res.json())[0];
+
+            total += product.price * item.quantity;
+            container.innerHTML += `
+              <div class="cart-item">
+                <p>${product.title} - ₦${product.price} x ${item.quantity}</p>
+                <button onclick="removeFromCart(${product.id})">Remove</button>
+              </div>
+            `;
+          }
+
+          document.getElementById("cart-total").textContent = total.toFixed(2);
+          document.getElementById("cart-count").textContent = items.length;
+        });
+    }
+
+    function removeFromCart(productId) {
+      fetch('/cart/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, product_id: productId })
+      }).then(() => {
+        loadCart();
+        updateCartCount();
+      });
+    }
+
+    function updateCartCount() {
+      fetch(`/cart/${userId}`)
+        .then(res => res.json())
+        .then(items => {
+          document.getElementById("cart-count").textContent = items.length;
+        });
+    }
+
+    function checkout() {
+      fetch(`/cart/${userId}`)
+        .then(res => res.json())
+        .then(async items => {
+          let message = "Hello, I want to place an order:\n";
+          let total = 0;
+
+          for (const item of items) {
+            const res = await fetch(`/search/product?q=&id=${item.product_id}`);
+            const product = (await res.json())[0];
+            message += `${product.title} - ₦${product.price} x ${item.quantity}\n`;
+            total += product.price * item.quantity;
+          }
+
+          message += `Total: ₦${total.toFixed(2)}`;
+          window.open(`https://wa.me/2348139704781?text=${encodeURIComponent(message)}`, "_blank");
+        });
+    }
+
+    // Load all products initially
+    fetch(`${baseUrl}/view/product`)
+      .then(res => res.json())
+      .then(data => {
+        productsGlobal = data.products || [];
+        renderProducts(productsGlobal);
+        updateCartCount();
+      })
+      .catch(err => {
+        document.getElementById("product").innerHTML = "<p>Error loading products</p>";
+        console.error("Fetch error:", err);
+      });
+  </script>
 </body>
 </html>

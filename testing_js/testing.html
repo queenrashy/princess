@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cart {
+            cursor: pointer;
+            position: relative;
+        }
+        .cart-count {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+        .product, .cart-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Product Store</h2>
+        <!-- Cart Icon with Item Count -->
+        <div class="cart" onclick="toggleCart()">
+            🛒 <span class="cart-count" id="cart-count">0</span>
+        </div>
+    </header>
+
+    <!-- Search Bar -->
+    <input type="text" id="search-input" placeholder="Search products...">
+    <button onclick="searchProducts()">Search</button>
+
+    <!-- Products List -->
+    <div id="products"></div>
+
+    <!-- Cart View -->
+    <div id="cart" style="display:none">
+        <h3>Your Cart</h3>
+        <div id="cart-items"></div>
+        <h4>Total: ₦<span id="cart-total">0.00</span></h4>
+        <button onclick="checkout()">Check Out</button>
+    </div>
+
+    <script>
+        const userId = 1; // assume user 1 for demo
+
+        // Toggle cart visibility
+        function toggleCart() {
+            const cartDiv = document.getElementById("cart");
+            cartDiv.style.display = cartDiv.style.display === "none" ? "block" : "none";
+            loadCart();
+        }
+
+        // Load products from search or default
+        async function searchProducts() {
+            const query = document.getElementById("search-input").value;
+            const res = await fetch(`/search/product?q=${encodeURIComponent(query)}`);
+            const products = await res.json();
+
+            const container = document.getElementById("products");
+            container.innerHTML = "";
+            products.forEach(p => {
+                const div = document.createElement("div");
+                div.className = "product";
+                div.innerHTML = `
+                    <h4>${p.title}</h4>
+                    <p>${p.description}</p>
+                    <p>₦${p.price}</p>
+                    <button onclick="addToCart(${p.id})">Add to Cart</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Add product to cart
+        async function addToCart(productId) {
+            await fetch('/cart/add', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ user_id: userId, product_id: productId, quantity: 1 })
+            });
+            alert("Added to cart");
+            updateCartCount();
+        }
+
+        // Load cart items
+        async function loadCart() {
+            const res = await fetch(`/cart/${userId}`);
+            const items = await res.json();
+
+            const container = document.getElementById("cart-items");
+            container.innerHTML = "";
+
+            let total = 0;
+            for (const item of items) {
+                const productRes = await fetch(`/search/product?q=&id=${item.product_id}`);
+                const product = (await productRes.json())[0];
+
+                total += product.price * item.quantity;
+                container.innerHTML += `
+                    <div class="cart-item">
+                        <p>${product.title} - ₦${product.price} x ${item.quantity}</p>
+                        <button onclick="removeFromCart(${item.product_id})">Remove</button>
+                    </div>
+                `;
+            }
+            document.getElementById("cart-total").textContent = total.toFixed(2);
+            document.getElementById("cart-count").textContent = items.length;
+        }
+
+        // Remove item from cart
+        async function removeFromCart(productId) {
+            await fetch('/cart/remove', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ user_id: userId, product_id: productId })
+            });
+            loadCart();
+            updateCartCount();
+        }
+
+        // Update cart count on icon
+        async function updateCartCount() {
+            const res = await fetch(`/cart/${userId}`);
+            const items = await res.json();
+            document.getElementById("cart-count").textContent = items.length;
+        }
+
+        // Checkout to WhatsApp
+        async function checkout() {
+            const res = await fetch(`/cart/${userId}`);
+            const items = await res.json();
+
+            let message = "Hello, I want to place an order:\n";
+            let total = 0;
+
+            for (const item of items) {
+                const productRes = await fetch(`/search/product?q=&id=${item.product_id}`);
+                const product = (await productRes.json())[0];
+
+                message += `${product.title} - ₦${product.price} x ${item.quantity}\n`;
+                total += product.price * item.quantity;
+            }
+            message += `Total: ₦${total.toFixed(2)}`;
+            const encodedMsg = encodeURIComponent(message);
+            window.open(`https://wa.me/2348012345678?text=${encodedMsg}`, '_blank');
+        }
+
+        // Load default products when page loads
+        searchProducts();
+        updateCartCount();
+    </script>
+</body>
+</html>

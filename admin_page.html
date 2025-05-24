@@ -1,11 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-</head>
-<body>
-    <h1>Welcome to admin page</h1>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Style</title>
+    <link rel="stylesheet" href="admin_page.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="hamburger" id="hamburger">☰</div>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#">Home</a></li>
+
+        <li class="has-dropdown">
+          <a href="#">Edit</a>
+          <ul class="dropdown">
+            <li><a href="#">Delete</a></li>
+            <li><a href="#">Post</a></li>
+            <li><a href="#">Update</a></li>
+          </ul>
+        </li>
+
+        <li class="has-dropdown">
+          <a href="#">Lists</a>
+          <ul class="dropdown">
+            <li><a href="#">User Lists</a></li>
+            <li><a href="#">Admin lists</a></li>
+          </ul>
+        </li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+    <!-- Posting Form -->
+    <form id="productForm" enctype="multipart/form-data">
+      <input
+        type="text"
+        name="title"
+        placeholder="Title"
+        required
+      /><br /><br />
+      <input
+        type="number"
+        name="price"
+        placeholder="Price"
+        required
+      /><br /><br />
+      <textarea name="description" placeholder="Description"></textarea
+      ><br /><br />
+      <input
+        type="text"
+        name="category"
+        placeholder="category"
+        required
+      /><br /><br />
+      <input type="file" name="image" required /><br /><br />
+      <button type="submit">Post Product</button>
+    </form>
+    <p id="response"></p>
+    <div id="product" class="product-container"></div>
+    <div
+      id="editModal"
+      style="
+        display: none;
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #fff;
+        padding: 20px;
+        border: 1px solid #ccc;
+        z-index: 1000;
+      "
+    >
+      <h3>Edit Product</h3>
+      <form id="editProductForm" enctype="multipart/form-data">
+        <input type="hidden" id="edit-id" name="id" />
+        <label
+          >Title:
+          <input type="text" id="edit-title" name="title" required /></label
+        ><br /><br />
+        <label
+          >Description:
+          <textarea
+            id="edit-description"
+            name="description"
+            required
+          ></textarea></label
+        ><br /><br />
+        <label
+          >Price:
+          <input
+            type="number"
+            id="edit-price"
+            name="price"
+            step="0.01"
+            required /></label
+        ><br /><br />
+        <!-- <label
+          >Change Image:
+          <input
+            type="file"
+            id="edit-file"
+            name="file"
+            accept="image/*" /></label -->
+        <!-- ><br /><br /> -->
+        <button type="submit">Save Changes</button>
+        <button type="button" id="closeEditModal">Cancel</button>
+      </form>
+    </div>
+
+    <script src="admin_page.js"></script>
+  </body>
 </html>
